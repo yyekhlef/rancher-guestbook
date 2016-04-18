@@ -1,0 +1,41 @@
+service-guestbook-frontend-blue:
+  scale: 2
+guestbook-front-lb-green:
+  scale: 1
+  load_balancer_config:
+    haproxy_config: {}
+  health_check:
+    port: 42
+    interval: 2000
+    unhealthy_threshold: 3
+    healthy_threshold: 2
+    response_timeout: 2000
+redis-slave:
+  scale: 2
+service-guestbook-lb-blue:
+  scale: 1
+  load_balancer_config:
+    haproxy_config: {}
+  health_check:
+    port: 42
+    interval: 2000
+    unhealthy_threshold: 3
+    healthy_threshold: 2
+    response_timeout: 2000
+redis-master:
+  scale: 1
+service-guestbook-api-lb-blue:
+  scale: 1
+  load_balancer_config:
+    haproxy_config: {}
+  health_check:
+    port: 42
+    interval: 2000
+    unhealthy_threshold: 3
+    healthy_threshold: 2
+    response_timeout: 2000
+service-guestbook-frontend-green:
+  scale: 2
+service-guestbook-api-server-blue:
+  scale: 2
+

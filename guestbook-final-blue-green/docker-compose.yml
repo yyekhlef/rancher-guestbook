@@ -1,0 +1,105 @@
+alias-guestbook-api-server:
+  image: rancher/dns-service
+  links:
+  - service-guestbook-api-lb-blue:service-guestbook-api-lb-blue
+service-guestbook-frontend-blue:
+  log_driver: ''
+  labels:
+    io.rancher.scheduler.affinity:container_label_soft_ne: io.rancher.stack_service.name=$${stack_name}/$${service_name}
+    io.rancher.container.pull_image: always
+    io.rancher.scheduler.affinity:host_label_ne: tier=back
+  tty: true
+  log_opt: {}
+  image: looztra/guestbook-frontend:v0.0.7-hack
+  links:
+  - alias-guestbook-api-server:guestbook-rest-server
+  stdin_open: true
+guestbook-front-lb-green:
+  ports:
+  - 8080:80
+  labels:
+    io.rancher.scheduler.affinity:host_label: tier=front
+    io.rancher.loadbalancer.target.alias-guestbook-api-server: /api
+  tty: true
+  image: rancher/load-balancer-service
+  links:
+  - service-guestbook-frontend-green:service-guestbook-frontend-green
+  - alias-guestbook-api-server:alias-guestbook-api-server
+  stdin_open: true
+redis-slave:
+  log_driver: ''
+  labels:
+    io.rancher.scheduler.affinity:container_label_soft_ne: io.rancher.stack_service.name=$${stack_name}/$${service_name}
+    io.rancher.container.pull_image: always
+    io.rancher.scheduler.affinity:host_label: tier=back
+  tty: true
+  command:
+  - redis-server
+  - --slaveof
+  - redis-master
+  - '6379'
+  log_opt: {}
+  image: redis:3-alpine
+  links:
+  - redis-master:redis-master
+  stdin_open: true
+service-guestbook-lb-blue:
+  ports:
+  - 80:80
+  labels:
+    io.rancher.scheduler.affinity:host_label: tier=front
+    io.rancher.loadbalancer.target.alias-guestbook-api-server: /api
+  tty: true
+  image: rancher/load-balancer-service
+  links:
+  - alias-guestbook-api-server:alias-guestbook-api-server
+  - service-guestbook-frontend-blue:service-guestbook-frontend-blue
+  stdin_open: true
+redis-master:
+  log_driver: ''
+  labels:
+    io.rancher.container.pull_image: always
+    io.rancher.scheduler.affinity:host_label: tier=back
+  tty: true
+  log_opt: {}
+  image: redis:3-alpine
+  stdin_open: true
+service-guestbook-api-lb-blue:
+  ports:
+  - 80:8080
+  labels:
+    io.rancher.scheduler.affinity:host_label: tier=middle
+  tty: true
+  image: rancher/load-balancer-service
+  links:
+  - service-guestbook-api-server-blue:service-guestbook-api-server-blue
+  stdin_open: true
+service-guestbook-frontend-green:
+  log_driver: ''
+  labels:
+    io.rancher.scheduler.affinity:container_label_soft_ne: io.rancher.stack_service.name=$${stack_name}/$${service_name}
+    io.rancher.container.pull_image: always
+    io.rancher.scheduler.affinity:host_label_ne: tier=back
+  tty: true
+  log_opt: {}
+  image: looztra/guestbook-frontend:v0.0.9-hack
+  links:
+  - alias-guestbook-api-server:guestbook-rest-server
+  stdin_open: true
+service-guestbook-api-server-blue:
+  log_driver: ''
+  labels:
+    io.rancher.scheduler.affinity:container_label_soft_ne: io.rancher.stack_service.name=$${stack_name}/$${service_name}
+    io.rancher.container.pull_image: always
+  tty: true
+  command:
+  - /app/run-java.sh
+  - --guestbook.backend.redis.read.vip=redis-slave
+  - --guestbook.backend.redis.write.vip=redis-master
+  log_opt: {}
+  image: looztra/guestbook-rest-service-server:v0.0.5
+  links:
+  - 'redis-slave:'
+  - 'redis-master:'
+  stdin_open: true
+
