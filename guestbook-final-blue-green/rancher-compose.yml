@@ -1,3 +1,5 @@
+alpine-to-del-2:
+  scale: 1
 service-guestbook-frontend-blue:
   scale: 2
 guestbook-front-lb-green:
@@ -12,6 +14,16 @@ guestbook-front-lb-green:
     response_timeout: 2000
 redis-slave:
   scale: 2
+guestbook-redis-slave-lb:
+  scale: 1
+  load_balancer_config:
+    haproxy_config: {}
+  health_check:
+    port: 42
+    interval: 2000
+    unhealthy_threshold: 3
+    healthy_threshold: 2
+    response_timeout: 2000
 service-guestbook-lb-blue:
   scale: 1
   load_balancer_config:
@@ -23,6 +35,8 @@ service-guestbook-lb-blue:
     healthy_threshold: 2
     response_timeout: 2000
 redis-master:
+  scale: 1
+alpine-to-del-1:
   scale: 1
 service-guestbook-api-lb-blue:
   scale: 1
