@@ -1,14 +1,4 @@
 
-ne-to-del-2:
-  log_driver: ''
-  labels:
-    io.rancher.container.pull_image: always
-  tty: true
-  command:
-  - ash
-  log_opt: {}
-  image: alpine
-  stdin_open: true
 alias-guestbook-api-server:
   image: rancher/dns-service
   links:
@@ -84,17 +74,6 @@ redis-master:
   tty: true
   log_opt: {}
   image: redis:3-alpine
-  stdin_open: true
-alpine-to-del-1:
-  log_driver: ''
-  labels:
-    io.rancher.sidekicks: alpine-to-del-2
-    io.rancher.container.pull_image: always
-  tty: true
-  command:
-  - ash
-  log_opt: {}
-  image: alpine
   stdin_open: true
 service-guestbook-api-lb-blue:
   ports:
